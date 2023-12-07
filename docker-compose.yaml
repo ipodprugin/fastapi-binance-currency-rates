@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: bwg-api
+    build: .
+    depends_on:
+      - db
+      - redis
+    command: bash -c 'uvicorn app.app:app --reload --host 0.0.0.0 --port 8000'
+    volumes:
+      - ./app:/src/app/
+    ports:
+      - ${API_PORT}:8000
+    restart: always
+    environment:
+      - DB_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    env_file:
+      - .env
+
+  db:
+    container_name: bwg-db
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - ./postgres_data:/var/lib/postgres/data
+    restart: always
+  
+  redis:
+    container_name: bwg-redis
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
