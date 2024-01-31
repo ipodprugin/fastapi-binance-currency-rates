@@ -8,6 +8,7 @@
 
 ## Для запуска:
 
+Создайте .env файл. Затем:
 ```bash
 docker-compose up --build
 ```
