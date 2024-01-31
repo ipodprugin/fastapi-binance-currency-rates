@@ -9,7 +9,10 @@ from sqlalchemy import insert, select
 from datetime import datetime
 
 
-async def _add_pair_rate_to_db(session, pair):
+async def _add_pair_rate_to_db(
+    session: AsyncSession, 
+    pair: models.CurrencyRatePayload
+) -> None:
     await session.execute(
         insert(db_models.CurrencyRates).values(
             pair=pair.pair,
@@ -19,7 +22,7 @@ async def _add_pair_rate_to_db(session, pair):
     )
 
 
-async def add_pairs_rate_to_db(pairs: list[models.CurrencyRatePayload]):
+async def add_pairs_rate_to_db(pairs: list[models.CurrencyRatePayload]) -> None:
     async with get_db_session() as session:
         for pair in pairs:
             await _add_pair_rate_to_db(session, pair)
@@ -46,7 +49,7 @@ async def db_get_pair_last_rate(
 
 async def db_get_pair_rates(
     session: AsyncSession, 
-    pair: str,
+    pairs: list[str] | None = None,
     date_from: datetime | None = None,
     date_to: datetime | None = None
 ) -> list[models.CurrencyRatePayload] | None:
@@ -54,11 +57,11 @@ async def db_get_pair_rates(
         select(
             db_models.CurrencyRates,
         ).where(
-            db_models.CurrencyRates.pair == pair,
+            db_models.CurrencyRates.pair in pairs if pairs else True,
             db_models.CurrencyRates.timestamp >= date_from if date_from else True,
             db_models.CurrencyRates.timestamp <= date_to if date_to else True
         ).order_by(
-            db_models.CurrencyRates.timestamp
+            db_models.CurrencyRates.timestamp if pairs else db_models.CurrencyRates.pair
         )
     )
     rates = rates.all()

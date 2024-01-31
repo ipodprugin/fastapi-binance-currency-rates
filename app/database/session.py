@@ -12,7 +12,7 @@ from app.config import settings
 
 
 @asynccontextmanager
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_db_session() -> AsyncSession | None:
     engine = create_async_engine(settings.DB_URL)
     factory = async_sessionmaker(engine)
     async with factory() as session:
@@ -21,4 +21,5 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
             await session.commit()
         except exc.SQLAlchemyError as error:
             await session.rollback()
-            raise
+            raise error
+

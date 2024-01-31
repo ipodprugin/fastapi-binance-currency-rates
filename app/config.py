@@ -9,8 +9,10 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: SecretStr
     DB_URL: str
+    DB_PORT: int
 
     REDIS_HOST: str
     REDIS_PORT: int
 
 settings = Settings()
+

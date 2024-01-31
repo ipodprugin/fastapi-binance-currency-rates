@@ -21,3 +21,4 @@ class CurrencyRates(Base):
     pair: orm.Mapped[str]
     price: orm.Mapped[float]
     timestamp: orm.Mapped[datetime]
+
