@@ -12,7 +12,7 @@ services:
       - ./app:/src/app/
     ports:
       - ${API_PORT}:8000
-    restart: always
+    restart: unless-stopped
     environment:
       - DB_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${DB_PORT}/${POSTGRES_DB}
     env_file:
@@ -25,12 +25,13 @@ services:
       - ${DB_PORT}:5432
     volumes:
       - ./postgres_data:/var/lib/postgres/data
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
 
   redis:
     container_name: bwg-redis
+    restart: unless-stopped
     image: redis:alpine
     ports:
       - ${REDIS_PORT}:6379

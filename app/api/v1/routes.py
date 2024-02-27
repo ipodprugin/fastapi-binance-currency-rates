@@ -22,12 +22,11 @@ router = APIRouter(prefix="/v1", tags=["v1"])
 @dataclass
 class GetRatesAgrs:
     pairs: Annotated[
-        list[str] | None, 
+        list[str], 
         Query(
             title='Список валютных пар',
-            description='Если параметр не указан - будут возвращены все пары',
         )
-    ] = None
+    ]
     date_from: datetime | None = None
     date_to: datetime | None = None
 
@@ -51,18 +50,16 @@ async def get_pair_last_rate(pair: str) -> models.CurrencyRatePayload | None:
 @router.get("/rates", status_code=status.HTTP_200_OK)
 async def get_pairs_rates(
     args: GetRatesAgrs = Depends(),
-# ) -> dict[str, list[models.CurrencyRatePayload]] | None:
 ) -> list[models.CurrencyRatePayload] | None:
     """ 
     Возвращает курсы валют.
 
-    """
-    rates_resp = {}
-    # `:param pairs:` Список пар валют.  
-    # `:param date_from:` Дата начала периода.  
-    # `:param date_to:` Дата окончания периода.  
+    `:param pairs:` Список пар валют.  
+    `:param date_from:` Дата начала периода.  
+    `:param date_to:` Дата окончания периода.  
 
-    # `:return:` Курсы валют. Если не указаны временные рамки - возвращает курсы за всё время.
+    `:return:` Курсы валют. Если не указаны временные рамки - возвращает курсы за всё время.
+    """
     async with get_db_session() as session:
         rates = await db_get_pair_rates(
             session, 
@@ -70,6 +67,5 @@ async def get_pairs_rates(
             args.date_from, 
             args.date_to
         )
-        # if rates: rates_resp[pair] = rates
-        rates_resp = rates
-    return rates_resp
+    return rates
+

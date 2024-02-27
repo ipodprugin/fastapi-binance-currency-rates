@@ -49,21 +49,21 @@ async def db_get_pair_last_rate(
 
 async def db_get_pair_rates(
     session: AsyncSession, 
-    pairs: list[str] | None = None,
+    pairs: list[str],
     date_from: datetime | None = None,
     date_to: datetime | None = None
 ) -> list[models.CurrencyRatePayload] | None:
-    rates = await session.scalars(
-        select(
+    sql = select(
             db_models.CurrencyRates,
         ).where(
-            db_models.CurrencyRates.pair in pairs if pairs else True,
+            db_models.CurrencyRates.pair.in_(pairs),
             db_models.CurrencyRates.timestamp >= date_from if date_from else True,
             db_models.CurrencyRates.timestamp <= date_to if date_to else True
         ).order_by(
             db_models.CurrencyRates.timestamp if pairs else db_models.CurrencyRates.pair
         )
-    )
+    rates = await session.scalars(sql)
     rates = rates.all()
     if rates:
         return [models.CurrencyRatePayload.model_validate(rate) for rate in rates]
+
